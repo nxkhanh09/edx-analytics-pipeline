@@ -149,7 +149,7 @@ class OrderTableTask(DatabaseImportMixin, HiveTableFromQueryTask):
 
                     -- Price charged to the customer after all surcharges and discounts
                     ol.line_price_incl_tax AS line_item_price,
-
+                    -- List price of each item before discounts
                     ol.unit_price_incl_tax AS line_item_unit_price,
                     ol.quantity AS line_item_quantity,
                     cpc.slug AS product_class,
@@ -162,7 +162,7 @@ class OrderTableTask(DatabaseImportMixin, HiveTableFromQueryTask):
 
                     -- Discount/coupon/voucher information
                     vcv.coupon_id AS coupon_id,
-                    od.amount AS discount_amount,
+                    (ol.line_price_before_discounts_incl_tax - ol.line_price_incl_tax) AS discount_amount,
                     od.voucher_id AS voucher_id,
                     od.voucher_code AS voucher_code,
 
@@ -215,10 +215,11 @@ class OrderTableTask(DatabaseImportMixin, HiveTableFromQueryTask):
                     GROUP BY order_line_id
                 ) r ON r.order_line_id = ol.id
 
-                -- Get discount information. Each order may have one voucher code applied.
-                -- We are relying on the ecommerce restriction that each order contains one line
-                -- and each order can have no more than one voucher applied.
-                LEFT OUTER JOIN order_orderdiscount od ON od.order_id = o.id
+                -- Get discount information. Each order may have zero or one voucher code applied.
+                -- We are relying on the ecommerce restriction that each order can have no more than one voucher
+                -- applied. If the order contains multiple line items, the AND condition below will join the discount
+                -- information only to the order line item(s) that were actually discounted.
+                LEFT OUTER JOIN order_orderdiscount od ON od.order_id = o.id AND (ol.line_price_incl_tax <> ol.line_price_before_discounts_incl_tax)
                 LEFT OUTER JOIN voucher_couponvouchers_vouchers vcvv ON vcvv.voucher_id = od.voucher_id
                 LEFT OUTER JOIN voucher_couponvouchers vcv ON vcv.id = vcvv.couponvouchers_id
 
@@ -246,7 +247,13 @@ class OrderTableTask(DatabaseImportMixin, HiveTableFromQueryTask):
                     -- The total cost is not stored, so we compute it
                     -- Note that this is the amount charged to the credit card after all discounts
                     (oi.qty * oi.unit_cost) AS line_item_price,
-                    oi.unit_cost AS line_item_unit_price,
+                    -- line_item_unit_price is supposed to be the list price per item (before discount)
+                    -- as is the case in Otto. So we use 'list_price' but since that may be null in some
+                    -- cases ( see https://git.io/vVXqO ), we fall back to unit_cost.
+                    CASE
+                        WHEN oi.list_price IS NOT NULL THEN oi.list_price
+                        ELSE oi.unit_cost
+                    END AS line_item_unit_price,
                     oi.qty AS line_item_quantity,
                     CASE
                         WHEN ci.orderitem_ptr_id IS NOT NULL THEN 'seat'          -- verified certificate

@@ -244,6 +244,7 @@ class ReconcileOrdersAndTransactionsTask(ReconcileOrdersAndTransactionsDownstrea
                 orderitem_audit_code = 'NO_COST'
             elif orderitem.line_item_price == 0.0:
                 # The order would normally have a cost but has been discounted 100% or an enrollment code was used.
+                # We expect this invariant: line_item_price = (line_item_unit_price * quantity) - discount_amount
                 if orderitem.discount_amount == orderitem.line_item_unit_price:
                     order_audit_code = 'ORDER_BALANCED'
                     orderitem_audit_code = 'NO_COST'
