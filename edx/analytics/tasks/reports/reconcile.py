@@ -266,17 +266,10 @@ class ReconcileOrdersAndTransactionsTask(ReconcileOrdersAndTransactionsDownstrea
                 # Missing white-label is not an error, even if it's not balanced.
                 order_audit_code = 'ORDER_NOT_BALANCED'
                 orderitem_audit_code = 'NO_TRANS_WHITE_LABEL'
-            elif orderitem.line_item_unit_price == 0.0:
+            elif orderitem.line_item_price == 0.0:
                 order_audit_code = 'ORDER_BALANCED'
                 orderitem_audit_code = 'NO_COST'
-            elif orderitem.line_item_price == 0.0:
-                # The order would normally have a cost but has been discounted 100% or an enrollment code was used.
-                # We expect this invariant: line_item_price = (line_item_unit_price * quantity) - discount_amount
-                if orderitem.discount_amount == orderitem.line_item_unit_price:
-                    order_audit_code = 'ORDER_BALANCED'
-                    orderitem_audit_code = 'NO_COST'
-                else:
-                    orderitem_audit_code = 'ERROR_MISMATCHED_DISCOUNT'
+
             # Note that we don't call "check_orderitem_wrongstatus" here, as the
             # existing status is generally sufficient.  In the case of "NO_COST"
             # honor enrollment orders, they may in fact be refunded when a user unenrolls,
