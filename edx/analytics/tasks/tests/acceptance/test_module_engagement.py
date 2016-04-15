@@ -48,27 +48,48 @@ class ModuleEngagementAcceptanceTest(AcceptanceTestCase):
         response = es_client.search(index="roster", doc_type="roster_entry", body=query)
 
         self.maxDiff = None
-        self.assertEquals(response['hits']['total'], 1)
+        self.assertEquals(response['hits']['total'], 2)
 
-        expected_doc = {
-            'attempt_ratio_order': 0,
-            'cohort': 'Group 2',
-            'course_id': 'edX/DemoX/Demo_Course_2',
-            'discussion_contributions': 0,
-            'email': 'staff@example.com',
-            'end_date': '2015-04-17',
-            'enrollment_date': '2015-04-16',
-            'enrollment_mode': 'honor',
-            'name': 'staff',
-            'problem_attempts': 0,
-            'problems_attempted': 0,
-            'problems_completed': 0,
-            'segments': ['highly_engaged', 'struggling'],
-            'start_date': '2015-04-10',
-            'username': 'staff',
-            'videos_viewed': 1
-        }
-        self.assertItemsEqual(response['hits']['hits'][0]['_source'], expected_doc)
+        expected_results = [
+            {
+                'attempt_ratio_order': 0,
+                'cohort': 'Group 2',
+                'course_id': 'edX/DemoX/Demo_Course_2',
+                'discussion_contributions': 0,
+                'email': 'staff@example.com',
+                'end_date': '2015-04-17',
+                'enrollment_date': '2015-04-16',
+                'enrollment_mode': 'honor',
+                'name': 'staff',
+                'problem_attempts': 0,
+                'problems_attempted': 0,
+                'problems_completed': 0,
+                'segments': ['highly_engaged', 'struggling'],
+                'start_date': '2015-04-10',
+                'username': 'staff',
+                'videos_viewed': 1
+            },
+            {
+                'attempt_ratio_order': 6,
+                'cohort': u'Group 1',
+                'course_id': u'edX/DemoX/Demo_Course',
+                'discussion_contributions': 6,
+                'email': u'honor@example.com',
+                'end_date': u'2015-04-17',
+                'enrollment_date': u'2015-04-13',
+                'enrollment_mode': u'honor',
+                'name': u'honor',
+                'problem_attempts': 6,
+                'problem_attempts_per_completed': 3.0,
+                'problems_attempted': 3,
+                'problems_completed': 2,
+                'segments': [u'highly_engaged', u'struggling'],
+                'start_date': u'2015-04-10',
+                'username': u'honor',
+                'videos_viewed': 2
+            },
+        ]
+        self.assertItemsEqual([res['_source'] for res in response['hits']['hits']], expected_results)
 
         with self.export_db.cursor() as cursor:
             cursor.execute('SELECT course_id, start_date, end_date, metric, range_type, low_value, high_value FROM module_engagement_metric_ranges')
