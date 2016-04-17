@@ -13,7 +13,7 @@ import os
 
 import boto
 import filechunkio
-import cjson
+import simplejson
 import ciso8601
 import opaque_keys
 import bson
@@ -53,11 +53,11 @@ def main():
 
     # Tell luigi what dependencies to pass to the Hadoop nodes
     # - boto is used for all direct interactions with s3.
-    # - cjson is used for all parsing event logs.
+    # - simplejson is used for all parsing event logs.
     # - filechunkio is used for multipart uploads of large files to s3.
     # - opaque_keys is used to interpret serialized course_ids
     #   - dependencies of opaque_keys:  bson, stevedore
-    luigi.hadoop.attach(boto, cjson, filechunkio, opaque_keys, bson, stevedore, ciso8601, requests)
+    luigi.hadoop.attach(boto, simplejson, filechunkio, opaque_keys, bson, stevedore, ciso8601, requests)
 
     # TODO: setup logging for tasks or configured logging mechanism
 
