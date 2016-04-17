@@ -7,7 +7,7 @@ import re
 import sys
 from collections import namedtuple, defaultdict
 
-import cjson
+import simplejson
 import luigi
 import luigi.date_interval
 
@@ -329,7 +329,7 @@ class ObfuscateCourseEventsTask(ObfuscatorMixin, MultiOutputMapReduceJobTask):
             # Re-encode payload as a json string if it originally was one.
             # (This test works because we throw away string values that didn't parse as JSON.)
             if isinstance(event.get('event'), basestring):
-                event['event'] = cjson.encode(event_data)
+                event['event'] = simplejson.encode(event_data)
             else:
                 event['event'] = event_data
 
