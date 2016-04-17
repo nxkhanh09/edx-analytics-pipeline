@@ -27,7 +27,7 @@ import os
 import sys
 
 from pyinstrument import Profiler
-import cjson
+import simplejson
 
 from edx.analytics.tasks.pathutil import PathSetTask
 from edx.analytics.tasks.util import eventlog
