@@ -350,7 +350,7 @@ class BulkObfuscator(object):
             # failing to parse it as a JSON string, just leave as-is.
             pass
         elif isinstance(event_data, basestring):
-            # Cjson produces str, while json produces unicode.  Hmm.
+            # Simple produces str, while json produces unicode.  Hmm.
             if len(event_data) == 512 and 'POST' in event_data:
                 # It's a truncated JSON string.  But we're going to throw it out anyway, so no worries.
                 pass
@@ -382,12 +382,12 @@ class BulkObfuscator(object):
             log.info(u"Obfuscated %s event with event_type = '%s'", event_source, event_type)
 
             if event_json_decoded:
-                # TODO: should really use cjson, if that were originally used for decoding the json.
+                # TODO: should really use simplejson, if that were originally used for decoding the json.
                 updated_event_data = json.dumps(updated_event_data)
 
             event['event'] = updated_event_data
 
-        # TODO: should really use cjson, if that were originally used for decoding the json.
+        # TODO: should really use simplejson, if that were originally used for decoding the json.
         return json.dumps(event)
 
     def obfuscate_courseware_file(self, input_filepath, output_dir):
@@ -444,7 +444,7 @@ class BulkObfuscator(object):
         # is not escaped in the same way.  In particular, we will not decode and encode it.
         state_str = record.state.replace('\\\\', '\\')
         try:
-            state_dict = cjson.decode(state_str, all_unicode=True)
+            state_dict = simplejson.decode(state_str, all_unicode=True)
         except Exception as exc:
             log.exception(u"Unable to parse state as JSON for record %s: type = %s, state = %r", record.id, type(state_str), state_str)
             return line
@@ -543,7 +543,7 @@ class BulkObfuscator(object):
         # are also different, as to when \u notation is used for a character as
         # opposed to a utf8 encoding of the character.
         try:
-            entry = cjson.decode(line, all_unicode=True)
+            entry = simplejson.decode(line, all_unicode=True)
         except ValueError as exc:
             log.error("Failed to parse json for line: %r", line)
             return ""
