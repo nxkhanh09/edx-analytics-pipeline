@@ -8,7 +8,7 @@ import tarfile
 import tempfile
 import xml.etree.ElementTree
 
-import cjson
+import simplejson
 import luigi
 import yaml
 
@@ -192,7 +192,7 @@ class ObfuscateCoursewareStudentModule(ObfuscateSqlDumpTask):
         # but merely transform double backslashes.
         state_str = row[4].replace('\\\\', '\\')
         try:
-            state_dict = cjson.decode(state_str, all_unicode=True)
+            state_dict = simplejson.decode(state_str, all_unicode=True)
             # Traverse the dictionary, looking for entries that need to be scrubbed.
             updated_state_dict = self.obfuscator.obfuscate_structure(state_dict, u"state", user_info)
         except Exception:   # pylint:  disable=broad-except
@@ -202,7 +202,7 @@ class ObfuscateCoursewareStudentModule(ObfuscateSqlDumpTask):
 
         if updated_state_dict is not None:
             # Can't reset values, so update original fields.
-            updated_state = cjson.encode(updated_state_dict).replace('\\', '\\\\')
+            updated_state = simplejson.encode(updated_state_dict).replace('\\', '\\\\')
             row[4] = updated_state
             if self.obfuscator.is_logging_enabled():
                 log.info(u"Obfuscated state for user_id '%s' module_id '%s'", user_id, row[2])
