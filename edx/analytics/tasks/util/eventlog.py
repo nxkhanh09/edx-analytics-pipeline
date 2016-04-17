@@ -1,6 +1,6 @@
 """Support for reading tracking event logs."""
 
-import cjson
+import simplejson
 import datetime
 import logging
 import re
@@ -15,14 +15,14 @@ PATTERN_JSON = re.compile(r'^.*?(\{.*\})\s*$')
 
 def decode_json(line):
     """Wrapper to decode JSON string in an implementation-independent way."""
-    # TODO: Verify correctness of cjson
-    return cjson.decode(line)
+    # TODO: Verify correctness of simplejson
+    return simplejson.decode(line)
 
 
 def encode_json(obj):
     """Wrapper to re-encode JSON string in an implementation-independent way."""
-    # TODO: Verify correctness of cjson
-    return cjson.encode(obj)
+    # TODO: Verify correctness of simplejson
+    return simplejson.encode(obj)
 
 
 def parse_json_event(line, nested=False):
