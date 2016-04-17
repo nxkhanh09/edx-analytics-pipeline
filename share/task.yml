@@ -38,6 +38,7 @@
     - local_log_dir: build/logs
     - install_env_debian:
         # EMR runs a modified version of Debian 6 (squeeze) on early AMIs, before switching their own RHEL variant.
+        WHEEL_URL: http://edx-wheelhouse.s3-website-us-east-1.amazonaws.com/Debian/squeeze
         # Match the version of Python define in virtualenv_python above.
         WHEEL_PYVER: 2.7
     - common_debian_variants:
